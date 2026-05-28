@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Apply for {{ job.title }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+
+    <a href="{% url 'job_detail' job.id %}"
+       class="jp-link d-inline-flex align-items-center gap-1 mb-3"
+       style="font-size:.875rem;">
+        ← Back to Job Details
+    </a>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-6 col-md-8">
+            <div class="jp-card">
+                <div class="card-body">
+
+                    <!-- Header -->
+                    <div class="text-center mb-4">
+                        <div style="font-size:2.5rem;margin-bottom:.5rem;">📄</div>
+                        <h2 style="font-weight:700;color:var(--jp-navy);letter-spacing:-.03em;
+                                   font-size:1.4rem;margin-bottom:.25rem;">
+                            Apply for Position
+                        </h2>
+                        <p style="color:var(--jp-text-muted);font-size:.875rem;margin:0;">
+                            Submitting for:
+                            <strong style="color:var(--jp-navy);">{{ job.title }}</strong>
+                        </p>
+                    </div>
+
+                    <hr class="jp-divider">
+
+                    <!-- Applying-as banner -->
+                    <div class="mb-4 p-3 rounded"
+                         style="background:var(--jp-bg);border:1px solid var(--jp-border);">
+                        <p class="jp-label mb-2">Applying as</p>
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="avatar-circle" style="width:36px;height:36px;">
+                                {{ user.first_name|first|upper }}{{ user.last_name|first|upper }}
+                            </div>
+                            <div>
+                                <div style="font-weight:600;font-size:.9rem;color:var(--jp-navy);">
+                                    {{ user.get_full_name|default:user.username }}
+                                </div>
+                                <div style="font-size:.8rem;color:var(--jp-text-muted);">
+                                    @{{ user.username }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Application form -->
+                    <form method="POST" enctype="multipart/form-data" novalidate>
+                        {% csrf_token %}
+
+                        <!-- Resume field rendered from ApplicationForm -->
+                        <div class="jp-form-group">
+                            <label class="jp-label" for="{{ form.resume.id_for_label }}">
+                                Resume / CV
+                                <span style="font-weight:400;text-transform:none;
+                                             letter-spacing:0;color:#adb5bd;">
+                                    (PDF, DOC, or DOCX)
+                                </span>
+                            </label>
+
+                            {{ form.resume }}
+
+                            {% if form.resume.errors %}
+                                {% for error in form.resume.errors %}
+                                    <div style="font-size:.78rem;color:#dc3545;margin-top:.3rem;">
+                                        {{ error }}
+                                    </div>
+                                {% endfor %}
+                            {% endif %}
+
+                            <p style="font-size:.78rem;color:var(--jp-text-muted);margin-top:.4rem;">
+                                Upload your latest resume to help the employer review your application.
+                            </p>
+                        </div>
+
+                        <div class="d-flex gap-2 mt-4">
+                            <button type="submit"
+                                    class="jp-btn jp-btn-accent flex-grow-1 justify-content-center">
+                                Submit Application
+                            </button>
+                            <a href="{% url 'job_detail' job.id %}"
+                               class="jp-btn jp-btn-ghost flex-shrink-0">
+                                Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}My Applications{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+
+    <div class="jp-page-header d-flex justify-content-between align-items-start flex-wrap gap-2">
+        <div>
+            <h2>My Applications</h2>
+            <p class="subtitle">Track the status of all your job applications</p>
+        </div>
+        <a href="{% url 'job_list' %}" class="jp-btn jp-btn-accent">Browse More Jobs →</a>
+    </div>
+
+    <!-- Status summary badges -->
+    {% if applications %}
+    <div class="d-flex gap-2 flex-wrap mb-4">
+        <span class="jp-badge jp-badge-info" style="padding:.4rem .9rem;">
+            All: {{ applications|length }}
+        </span>
+        <span class="jp-badge jp-badge-pending" style="padding:.4rem .9rem;">
+            Pending: {{ pending_count|default:"0" }}
+        </span>
+        <span class="jp-badge jp-badge-accepted" style="padding:.4rem .9rem;">
+            Accepted: {{ accepted_count|default:"0" }}
+        </span>
+        <span class="jp-badge jp-badge-rejected" style="padding:.4rem .9rem;">
+            Rejected: {{ rejected_count|default:"0" }}
+        </span>
+    </div>
+    {% endif %}
+
+    <div class="jp-table-wrap">
+        <table class="table jp-table mb-0">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Job Position</th>
+                    <th>Date Applied</th>
+                    <th>Resume</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for app in applications %}
+                <tr>
+                    <td style="color:var(--jp-text-muted);font-family:var(--jp-mono);font-size:.8rem;">
+                        #{{ forloop.counter }}
+                    </td>
+                    <td>
+                        <a href="{% url 'job_detail' app.job.id %}" class="jp-link" style="font-weight:600;">
+                            {{ app.job.title }}
+                        </a>
+                        <div style="font-size:.78rem;color:var(--jp-text-muted);">
+                            by {{ app.job.posted_by.get_full_name|default:app.job.posted_by.username }}
+                        </div>
+                    </td>
+                    <td style="color:var(--jp-text-muted);font-size:.85rem;white-space:nowrap;">
+                        {{ app.applied_at|date:"M d, Y" }}<br>
+                        <span style="font-size:.78rem;font-family:var(--jp-mono);">{{ app.applied_at|date:"H:i" }}</span>
+                    </td>
+                    <td>
+                        {% if app.resume %}
+                            <a href="{{ app.resume.url }}" class="jp-btn jp-btn-outline jp-btn-sm" target="_blank">
+                                View
+                            </a>
+                        {% else %}
+                            <span style="font-size:.82rem;color:var(--jp-text-muted);">—</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if app.status == 'accepted' %}
+                            <span class="jp-badge jp-badge-accepted">Accepted</span>
+                        {% elif app.status == 'rejected' %}
+                            <span class="jp-badge jp-badge-rejected">Rejected</span>
+                        {% else %}
+                            <span class="jp-badge jp-badge-pending">Pending</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr class="empty-row">
+                    <td colspan="5">
+                        <div class="jp-empty-state">
+                            <span class="empty-icon">📄</span>
+                            You haven't applied to any jobs yet.
+                            <br>
+                            <a href="{% url 'job_list' %}" class="jp-btn jp-btn-primary jp-btn-sm mt-3">Browse Available Jobs</a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</div>
+{% endblock %}

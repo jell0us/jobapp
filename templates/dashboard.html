@@ -1,0 +1,288 @@
+{% extends 'base.html' %}
+{% load static %}
+
+
+{% block content %}
+<div class="container-fluid">
+    <div class="jp-welcome-banner">
+        {% if user.is_staff %}
+            <div class="jp-role-badge">Employer</div>
+        {% else %}
+            <div class="jp-role-badge">Applicant</div>
+        {% endif %}
+        <h2>Good day, {{ user.username }}!</h2>
+        <p>
+            {% if user.is_staff %}
+                Here's an overview of your job postings and applicant activity.
+            {% else %}
+                Here's a summary of your job search and applications.
+            {% endif %}
+        </p>
+    </div>
+
+    {% if user.is_staff %}
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-lg-3">
+            <div class="jp-stat-card stat-navy">
+                <div class="jp-stat-value">{{ total_jobs }}</div>
+                <div class="jp-stat-label">Jobs Posted</div>
+            </div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="jp-stat-card stat-blue">
+                <div class="jp-stat-value">{{ total_applicants }}</div>
+                <div class="jp-stat-label">Total Applicants</div>
+            </div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="jp-stat-card stat-amber">
+                <div class="jp-stat-value">{{ pending_count }}</div>
+                <div class="jp-stat-label">Pending Review</div>
+            </div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="jp-stat-card stat-green">
+                <div class="jp-stat-value">{{ accepted_count }}</div>
+                <div class="jp-stat-label">Accepted</div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="row g-3">
+        <div class="col-lg-4">
+            <div class="jp-card h-100">
+                <div class="card-body">
+                    <div class="jp-section-header">
+                        <h5>Quick Actions</h5>
+                    </div>
+                    <div class="d-flex flex-column gap-2 mt-3">
+                        <a href="{% url 'post_job' %}" class="jp-quick-card d-flex align-items-center gap-3 text-start" style="text-align:left !important;">
+                            <span class="jp-quick-icon">＋</span>
+                            <div>
+                                <div class="jp-quick-label">Post New Job</div>
+                                <div style="font-size:.8rem;color:var(--jp-text-muted);">Add a new job listing</div>
+                            </div>
+                        </a>
+                        <a href="{% url 'application_list' %}" class="jp-quick-card d-flex align-items-center gap-3 text-start" style="text-align:left !important;">
+                            <div>
+                                <div class="jp-quick-label">View All Applicants</div>
+                                <div style="font-size:.8rem;color:var(--jp-text-muted);">Review submitted applications</div>
+                            </div>
+                        </a>
+                        <a href="{% url 'job_list' %}" class="jp-quick-card d-flex align-items-center gap-3 text-start" style="text-align:left !important;">
+                            <div>
+                                <div class="jp-quick-label">Manage Jobs</div>
+                                <div style="font-size:.8rem;color:var(--jp-text-muted);">Edit or remove listings</div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-8">
+            <div class="jp-card h-100">
+                <div class="card-body">
+                    <div class="jp-section-header">
+                        <h5>Recent Applications</h5>
+                        <a href="{% url 'application_list' %}" class="jp-btn jp-btn-ghost jp-btn-sm">View All</a>
+                    </div>
+                    {% if recent_applications %}
+                    <div class="jp-table-wrap mt-2">
+                        <table class="table jp-table mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Applicant</th>
+                                    <th>Job</th>
+                                    <th>Date Applied</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for application in recent_applications %}
+                                <tr>
+                                    <td><strong>{{ application.applicant.get_full_name }}</strong></td>
+                                    <td>
+                                        <a href="{% url 'job_detail' application.job.id %}" class="jp-link">
+                                            {{ application.job.title }}
+                                        </a>
+                                    </td>
+                                    <td style="color:var(--jp-text-muted);font-size:.82rem;">{{ application.applied_at }}</td>
+                                    <td>
+                                        {% if app.status == 'accepted' %}
+                                            <span class="jp-badge jp-badge-accepted">Accepted</span>
+                                        {% elif app.status == 'rejected' %}
+                                            <span class="jp-badge jp-badge-rejected">Rejected</span>
+                                        {% else %}
+                                            <span class="jp-badge jp-badge-pending">Pending</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="jp-empty-state">
+                        No applications yet.
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+
+    {% else %}
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-lg-3">
+            <div class="jp-stat-card stat-navy">
+                <div class="jp-stat-value">{{ total_jobs }}</div>
+                <div class="jp-stat-label">Jobs Available</div>
+            </div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="jp-stat-card stat-blue">
+                <div class="jp-stat-value">{{ applied_count }}</div>
+                <div class="jp-stat-label">Applied</div>
+            </div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="jp-stat-card stat-amber">
+                <div class="jp-stat-value">{{ pending_count }}</div>
+                <div class="jp-stat-label">Pending</div>
+            </div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="jp-stat-card stat-green">
+                <div class="jp-stat-value">{{ accepted_count }}</div>
+                <div class="jp-stat-label">Accepted</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-lg-4">
+            <div class="jp-card h-100">
+                <div class="card-body">
+                    <div class="jp-section-header">
+                        <h5>My Profile</h5>
+                    </div>
+                    <div class="text-center mt-3 mb-3">
+                        <div class="avatar-circle mx-auto mb-2"
+                             style="width:64px;height:64px;font-size:1.4rem;">
+                        </div>
+                        <div style="font-weight:700;color:var(--jp-navy);">{{ user.username }}</div>
+                        <div style="font-size:.82rem;color:var(--jp-text-muted);">@{{ user.username }}</div>
+                    </div>
+                    {% if user.userdetail %}
+                    <div style="font-size:.85rem;" class="mt-3">
+                        <div class="d-flex justify-content-between py-2 border-bottom">
+                            <span style="color:var(--jp-text-muted);">Contact</span>
+                            <span style="font-weight:500;">{{ user.userdetail.contactno }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between py-2 border-bottom">
+                            <span style="color:var(--jp-text-muted);">Gender</span>
+                            <span style="font-weight:500;">
+                                {% if user.userdetail.gender == 'M' %}Male
+                                {% elif user.userdetail.gender == 'F' %}Female
+                                {% else %}Others{% endif %}
+                            </span>
+                        </div>
+                        <div class="d-flex justify-content-between py-2">
+                            <span style="color:var(--jp-text-muted);">Birthday</span>
+                            <span style="font-weight:500;">{{ user.userdetail.birthdate }}</span>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+
+        <div class="col-lg-8">
+            <div class="d-flex flex-column gap-3">
+                <div class="jp-card">
+                    <div class="card-body">
+                        <div class="jp-section-header">
+                            <h5>Recent Job Listings</h5>
+                            <a href="{% url 'job_list' %}" class="jp-btn jp-btn-ghost jp-btn-sm">Browse All →</a>
+                        </div>
+                        <div class="d-flex flex-column gap-2 mt-2">
+                            {% if recent_jobs %}
+                                {% for job in recent_jobs %}
+                                <a href="{% url 'job_detail' job.id %}" class="jp-job-card">
+                                    <div>
+                                        <div class="jp-job-title">{{ job.title }}</div>
+                                        <div class="jp-job-meta">
+                                            <span>Posted {{ job.posted_date }}</span>
+                                            <span>by {{ job.posted_by.get_full_name }}</span>
+                                        </div>
+                                    </div>
+                                    <span class="jp-btn jp-btn-accent jp-btn-sm flex-shrink-0">Apply Now</span>
+                                </a>
+                                {% endfor %}
+                            {% else %}
+                                <div class="jp-empty-state">
+                                    No job listings available.
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="jp-card">
+                    <div class="card-body">
+                        <div class="jp-section-header">
+                            <h5>My Recent Applications</h5>
+                            <a href="{% url 'my_applications' %}" class="jp-btn jp-btn-ghost jp-btn-sm">View All</a>
+                        </div>
+                        {% if my_applications %}
+                        <div class="jp-table-wrap mt-2">
+                            <table class="table jp-table mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Job Title</th>
+                                        <th>Applied</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for application in my_applications %}
+                                    <tr>
+                                        <td>
+                                            <a href="{% url 'job_detail' %}" class="jp-link">
+                                                {{ application.job.title }}
+                                            </a>
+                                        </td>
+                                        <td style="color:var(--jp-text-muted);font-size:.82rem;">{{ app.applied_at }}</td>
+                                        <td>
+                                            {% if app.status == 'accepted' %}
+                                                <span class="jp-badge jp-badge-accepted">Accepted</span>
+                                            {% elif app.status == 'rejected' %}
+                                                <span class="jp-badge jp-badge-rejected">Rejected</span>
+                                            {% else %}
+                                                <span class="jp-badge jp-badge-pending">Pending</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        {% else %}
+                        <div class="jp-empty-state">
+                            You haven't applied to any jobs yet.
+                            <br>
+                            <a href="{% url 'job_list' %}" class="jp-btn jp-btn-primary jp-btn-sm mt-3">Browse Jobs</a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

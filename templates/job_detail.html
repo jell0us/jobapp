@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ job.title }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-3">
+
+    <a href="{% url 'job_list' %}" class="jp-link d-inline-flex align-items-center gap-1 mb-3" style="font-size:.875rem;">
+        ← Back to Jobs
+    </a>
+
+    <div class="row g-3">
+
+        <div class="col-lg-8">
+            <div class="jp-card">
+                <div class="card-body p-4">
+
+                    <div class="d-flex align-items-center gap-2 mb-3">
+                        <h2 style="font-weight:700; color:var(--jp-navy); letter-spacing:-.03em; margin:0;">
+                            {{ job.title }}
+                        </h2>
+                        <span class="jp-badge jp-badge-new">Open</span>
+                    </div>
+
+                    <hr class="jp-divider my-3">
+
+                    <div class="mb-4">
+                        <p class="jp-label">Job Description</p>
+                        <p style="color:var(--jp-slate); line-height:1.75; white-space: pre-line;">{{ job.description }}</p>
+                    </div>
+
+                    <div class="mb-2">
+                        <p class="jp-label">Requirements</p>
+                        <p style="color:var(--jp-slate); line-height:1.75; white-space: pre-line;">{{ job.requirements }}</p>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            
+            <div class="jp-card mb-3">
+                <div class="card-body">
+                    <p class="jp-label mb-3">Job Overview</p>
+                    <div style="font-size:.875rem;" class="d-flex flex-column gap-2">
+                        <div class="d-flex justify-content-between py-2 border-bottom">
+                            <span style="color:var(--jp-text-muted);">Posted By</span>
+                            <span style="font-weight:600; color:var(--jp-navy);">
+                                {{ job.posted_by.get_full_name|default:job.posted_by.username }}
+                            </span>
+                        </div>
+                        <div class="d-flex justify-content-between py-2">
+                            <span style="color:var(--jp-text-muted);">Date Posted</span>
+                            <span style="font-weight:500;">{{ job.posted_date|date:"M d, Y" }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {% if user.is_authenticated and not user.is_staff %}
+            <div class="jp-card" style="border: 1.5px solid var(--jp-accent);">
+                <div class="card-body text-center p-4">
+                    <div style="font-size:2rem; margin-bottom:.25rem;">🚀</div>
+                    <p style="font-weight:600; color:var(--jp-navy); margin-bottom:.5rem;">Interested in this role?</p>
+                    <p style="font-size:.83rem; color:var(--jp-text-muted); margin-bottom:1.25rem;">
+                        Submit your resume today and the employer will review your profile.
+                    </p>
+                    <a href="{% url 'apply_job' job.id %}" class="jp-btn jp-btn-accent w-100 justify-content-center">
+                        Apply Now →
+                    </a>
+                </div>
+            </div>
+            
+            {% elif not user.is_authenticated %}
+            <div class="jp-card">
+                <div class="card-body text-center p-4">
+                    <div style="font-size:2rem; margin-bottom:.25rem;">🔒</div>
+                    <p style="font-weight:600; color:var(--jp-navy); margin-bottom:.5rem;">Ready to apply?</p>
+                    <p style="font-size:.83rem; color:var(--jp-text-muted); margin-bottom:1.25rem;">
+                        You need to sign in to your applicant account to submit a resume.
+                    </p>
+                    <a href="{% url 'login_user' %}?next={{ request.path }}" class="jp-btn jp-btn-outline w-100 justify-content-center">
+                        Login to Apply
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if user.is_staff %}
+            <div class="jp-card" style="border: 1.5px solid var(--jp-border);">
+                <div class="card-body p-4">
+                    <p class="jp-label mb-3">Employer Control</p>
+                    <div class="d-flex flex-column gap-2">
+                        <a href="{% url 'application_list' %}?job_id={{ job.id }}" class="jp-btn jp-btn-outline w-100 justify-content-center">
+                            📊 View Applicants for this Job
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            
+        </div>
+
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Applications{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+
+    <div class="jp-page-header d-flex justify-content-between align-items-start flex-wrap gap-2">
+        <div>
+            <h2>All Applications</h2>
+            <p class="subtitle">Review and manage submitted applications</p>
+        </div>
+        <span class="jp-badge jp-badge-info" style="padding:.45rem 1rem;font-size:.82rem;">
+            {{ applications|length }} Total
+        </span>
+    </div>
+
+    <div class="jp-table-wrap">
+        <table class="table jp-table mb-0">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Applicant</th>
+                    <th>Job Position</th>
+                    <th>Date Applied</th>
+                    <th>Resume</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for app in applications %}
+                <tr>
+                    <td style="color:var(--jp-text-muted);font-family:var(--jp-mono);font-size:.8rem;">
+                        #{{ forloop.counter }}
+                    </td>
+                    <td>
+                        <div style="font-weight:600;color:var(--jp-navy);">
+                            {{ app.applicant.get_full_name|default:app.applicant.username }}
+                        </div>
+                        <div style="font-size:.78rem;color:var(--jp-text-muted);">@{{ app.applicant.username }}</div>
+                    </td>
+                    <td>
+                        <a href="{% url 'job_detail' app.job.id %}" class="jp-link">
+                            {{ app.job.title }}
+                        </a>
+                    </td>
+                    <td style="color:var(--jp-text-muted);font-size:.85rem;white-space:nowrap;">
+                        {{ app.applied_at|date:"M d, Y" }}<br>
+                        <span style="font-size:.78rem;font-family:var(--jp-mono);">{{ app.applied_at|date:"H:i" }}</span>
+                    </td>
+                    <td>
+                        {% if app.resume %}
+                            <a href="{{ app.resume.url }}" class="jp-btn jp-btn-outline jp-btn-sm" target="_blank">
+                                View Resume
+                            </a>
+                        {% else %}
+                            <span style="font-size:.82rem;color:var(--jp-text-muted);">No resume</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if app.status == 'accepted' %}
+                            <span class="jp-badge jp-badge-accepted">Accepted</span>
+                        {% elif app.status == 'rejected' %}
+                            <span class="jp-badge jp-badge-rejected">Rejected</span>
+                        {% else %}
+                            <span class="jp-badge jp-badge-pending">Pending</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr class="empty-row">
+                    <td colspan="6">
+                        <div class="jp-empty-state">
+                            <span class="empty-icon">📭</span>
+                            No applications have been submitted yet.
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</div>
+{% endblock %}

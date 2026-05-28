@@ -252,7 +252,7 @@
                                     {% for application in my_applications %}
                                     <tr>
                                         <td>
-                                            <a href="{% url 'job_detail' %}" class="jp-link">
+                                            <a href="{% url 'job_detail' job_id=application.job.id %}" class="jp-link">
                                                 {{ application.job.title }}
                                             </a>
                                         </td>

@@ -1,5 +1,5 @@
 from django import forms
-from django.forms import ModelForm, TextInput, Select, Textarea, ClearableFileInput, EmailInput, PasswordInput, DateInput
+from django.forms import ModelForm, TextInput, Select, Textarea, ClearableFileInput, PasswordInput, DateInput, FileInput
 from .models import Application, Job, UserDetail
 from django.contrib.auth.models import User 
 
@@ -44,7 +44,7 @@ class EmployerRegistrationForm(forms.ModelForm):
         fields = ['company_name', 'gender', 'address', 'contactno']
         widgets = {
             'company_name': TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter Company Name (e.g., Tech Corp)'}),
-            'gender': Select(attrs={'class': 'form-select', 'id': 'gender'}, choices=[('M', 'Male'), ('F', 'Female')]),
+            'gender': Select(attrs={'class': 'form-select', 'id': 'gender'}, choices=[('M', 'Male'), ('F', 'Female'), ('O', 'Others')]),
             'address': Textarea(attrs={'class': 'form-control', 'placeholder': 'Business Address', 'rows': '3'}),
             'contactno': TextInput(attrs={'class': 'form-control', 'placeholder': '09XX-XXX-XXXX'}),
         }
@@ -53,9 +53,10 @@ class EmployerRegistrationForm(forms.ModelForm):
 class ApplicationForm(forms.ModelForm):
     class Meta:
         model = Application
-        fields = ['resume'] 
+        fields = ['resume', 'status'] 
         widgets = {
-            'resume': forms.FileInput(attrs={'class': 'form-control'}), 
+            'resume': FileInput(attrs={'class': 'form-control'}), 
+            'status': forms.Select(attrs={'class': 'form-select', 'id': 'status'}),
         }
 
 
@@ -68,3 +69,4 @@ class JobForm(forms.ModelForm):
             'description': Textarea(attrs={'class': 'form-control', 'placeholder': 'Describe the role, responsibilities, and what a typical day looks like...'}),
             'requirements': Textarea(attrs={'class': 'form-control', 'placeholder': 'List skills, experience, education, or certifications needed...'}),
         }
+    

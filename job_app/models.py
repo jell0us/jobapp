@@ -26,12 +26,14 @@ class Job(models.Model):
        return self.title
    
 class Application(models.Model):
-   job = models.ForeignKey(Job, on_delete=models.CASCADE, blank=False, null=False)
-   applicant = models.ForeignKey(User, on_delete=models.CASCADE, null=True) 
-   resume = models.FileField(upload_to='resumes/')
-   applied_at = models.DateTimeField(auto_now_add=True)
+
+    job = models.ForeignKey(Job, on_delete=models.CASCADE, blank=False, null=False)
+    applicant = models.ForeignKey(User, on_delete=models.CASCADE, null=True) 
+    resume = models.FileField(upload_to='resumes/')
+    applied_at = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(max_length=20, blank=True, null=True)
    
-   def __str__(self):
-       applicant_name = self.applicant.username if self.applicant else 'Unknown Applicant'
-       job_title = self.job.title if self.job else 'Unknown Job'
-       return f"{applicant_name} applied for {job_title}"
+    def __str__(self):
+        applicant_name = self.applicant.username if self.applicant else 'Unknown Applicant'
+        job_title = self.job.title if self.job else 'Unknown Job'
+        return f"{applicant_name} applied for {job_title} ({self.get_status_display()})"

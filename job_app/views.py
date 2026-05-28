@@ -4,9 +4,9 @@ from django.contrib.auth.models import User
 from django.contrib import messages 
 from django.contrib.auth.decorators import login_required
 from django.views.generic import TemplateView
-from django.db.models import Count, Q
 from .models import UserDetail, Job, Application
 from .forms import LoginForm, ApplicationForm, JobForm, ApplicantRegistrationForm, EmployerRegistrationForm
+from django.http import HttpResponseForbidden
 
 
 class LandingPage(TemplateView):
@@ -211,3 +211,15 @@ def post_job(request):
     else:
         form = JobForm()
     return render(request, 'post_job.html', {'form': form})
+
+@login_required
+def update_application_status(request, application_id, status):
+    if not request.user.is_staff:
+        return HttpResponseForbidden("You do not have permission to perform this action.")
+
+    if status in ['accepted', 'rejected', 'pending']:
+        application = get_object_or_404(Application, id=application_id)
+        application.status = status
+        application.save()
+
+    return redirect(request.META.get('HTTP_REFERER', 'application_list'))

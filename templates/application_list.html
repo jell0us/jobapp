@@ -59,20 +59,29 @@
                         {% endif %}
                     </td>
                     <td>
-                        {% if app.status == 'accepted' %}
-                            <span class="jp-badge jp-badge-accepted">Accepted</span>
-                        {% elif app.status == 'rejected' %}
-                            <span class="jp-badge jp-badge-rejected">Rejected</span>
-                        {% else %}
-                            <span class="jp-badge jp-badge-pending">Pending</span>
-                        {% endif %}
+                        <div class="jp-form-group mb-0" style="max-width: 160px;">
+                            {% if user.is_staff %}
+                                <select class="form-select form-select-sm" onchange="location = this.value;" style="font-size: 0.85rem; cursor: pointer;">
+                                    <option value="{% url 'update_status' application_id=app.id status='pending' %}" {% if app.status == 'pending' %}selected{% endif %}>Pending</option>
+                                    <option value="{% url 'update_status' application_id=app.id status='accepted' %}" {% if app.status == 'accepted' %}selected{% endif %}>Accepted</option>
+                                    <option value="{% url 'update_status' application_id=app.id status='rejected' %}" {% if app.status == 'rejected' %}selected{% endif %}>Rejected</option>
+                                </select>
+                            {% else %}
+                                {% if app.status == 'accepted' %}
+                                    <span class="jp-badge jp-badge-accepted">Accepted</span>
+                                {% elif app.status == 'rejected' %}
+                                    <span class="jp-badge jp-badge-rejected">Rejected</span>
+                                {% else %}
+                                    <span class="jp-badge jp-badge-pending">Pending</span>
+                                {% endif %}
+                            {% endif %}
+                        </div>
                     </td>
                 </tr>
                 {% empty %}
                 <tr class="empty-row">
                     <td colspan="6">
                         <div class="jp-empty-state">
-                            <span class="empty-icon">📭</span>
                             No applications have been submitted yet.
                         </div>
                     </td>

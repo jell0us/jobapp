@@ -37,6 +37,7 @@ urlpatterns = [
    path('application/success/', views.application_success, name='application_success'),
    path('applications/', views.application_list, name='application_list'),
    path('my_applications/', views.my_applications, name='my_applications'),
+   path('applications/<int:application_id>/status/<str:status>/', views.update_application_status, name='update_status'),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

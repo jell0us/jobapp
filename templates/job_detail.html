@@ -7,7 +7,7 @@
 <div class="container-fluid py-3">
 
     <a href="{% url 'job_list' %}" class="jp-link d-inline-flex align-items-center gap-1 mb-3" style="font-size:.875rem;">
-        ← Back to Jobs
+         Back to Jobs
     </a>
 
     <div class="row g-3">
@@ -60,18 +60,33 @@
             </div>
 
             {% if user.is_authenticated and not user.is_staff %}
-            <div class="jp-card" style="border: 1.5px solid var(--jp-accent);">
-                <div class="card-body text-center p-4">
-                    <div style="font-size:2rem; margin-bottom:.25rem;">🚀</div>
-                    <p style="font-weight:600; color:var(--jp-navy); margin-bottom:.5rem;">Interested in this role?</p>
-                    <p style="font-size:.83rem; color:var(--jp-text-muted); margin-bottom:1.25rem;">
-                        Submit your resume today and the employer will review your profile.
-                    </p>
-                    <a href="{% url 'apply_job' job.id %}" class="jp-btn jp-btn-accent w-100 justify-content-center">
-                        Apply Now →
-                    </a>
+                {% if has_applied %}
+                <div class="jp-card" style="border: 1.5px solid #dee2e6; background-color: #f8f9fa;">
+                    <div class="card-body text-center p-4">
+                        <div style="font-size:2rem; margin-bottom:.25rem;">✅</div>
+                        <p style="font-weight:600; color:var(--jp-navy); margin-bottom:.5rem;">Application Submitted</p>
+                        <p style="font-size:.83rem; color:var(--jp-text-muted); margin-bottom:1.25rem;">
+                            You applied for this position. The employer will review your application and contact you if you're shortlisted.
+                        </p>
+                        <a href="{% url 'my_applications' %}" class="jp-btn jp-btn-outline w-100 justify-content-center" style="gap: 0.5rem;">
+                            💼 View My Applications
+                        </a>
+                    </div>
                 </div>
-            </div>
+                {% else %}
+                <div class="jp-card" style="border: 1.5px solid var(--jp-accent);">
+                    <div class="card-body text-center p-4">
+                        <div style="font-size:2rem; margin-bottom:.25rem;">🚀</div>
+                        <p style="font-weight:600; color:var(--jp-navy); margin-bottom:.5rem;">Interested in this role?</p>
+                        <p style="font-size:.83rem; color:var(--jp-text-muted); margin-bottom:1.25rem;">
+                            Submit your resume today and the employer will review your profile.
+                        </p>
+                        <a href="{% url 'apply_job' job.id %}" class="jp-btn jp-btn-accent w-100 justify-content-center">
+                            Apply Now 
+                        </a>
+                    </div>
+                </div>
+                {% endif %}
             
             {% elif not user.is_authenticated %}
             <div class="jp-card">

@@ -18,23 +18,38 @@
     {% if jobs %}
     <div class="d-flex flex-column gap-2">
         {% for job in jobs %}
-        <a href="{% url 'job_detail' job.id %}" class="jp-job-card">
-            <div>
+        <div class="jp-job-card d-flex justify-content-between align-items-center gap-3">
+            <a href="{% url 'job_detail' job.id %}" class="flex-grow-1" style="text-decoration:none;color:inherit;">
                 <div class="jp-job-title">{{ job.title }}</div>
                 <div class="jp-job-meta">
                     <span>Posted {{ job.posted_date }}</span>
                     <span>by {{ job.posted_by.username }}</span>
                     <span style="color:var(--jp-navy);font-weight:500;">{{ job.description }}</span>
                 </div>
-            </div>
-            <div class="flex-shrink-0">
+            </a>
+            <div class="flex-shrink-0 d-flex gap-2 align-items-center">
                 {% if user.is_authenticated and not user.is_staff %}
-                    <span class="jp-btn jp-btn-accent jp-btn-sm">Apply Now</span>
+                    {% if job.has_applied %}
+                        <span class="jp-btn jp-btn-sm" style="background-color: #e9ecef; color: #6c757d; border: 1px solid #dee2e6; cursor: not-allowed;">Applied</span>
+                    {% else %}
+                        <a href="{% url 'apply_job' job.id %}" class="jp-btn jp-btn-accent jp-btn-sm">Apply Now</a>
+                    {% endif %}
+                {% elif user.is_staff %}
+                    {# FEATURE 2 — Edit and Delete buttons for employer's own listings #}
+                    {% if job.posted_by == user %}
+                        <a href="{% url 'edit_job' job.id %}" class="jp-btn jp-btn-outline jp-btn-sm">✏️ Edit</a>
+                        <a href="{% url 'delete_job' job.id %}" class="jp-btn jp-btn-sm"
+                           style="background:#fff1f0;color:#dc3545;border:1px solid #f5c6cb;">
+                            🗑 Delete
+                        </a>
+                    {% else %}
+                        <span class="jp-btn jp-btn-outline jp-btn-sm">View Details</span>
+                    {% endif %}
                 {% else %}
-                    <span class="jp-btn jp-btn-outline jp-btn-sm">View Details </span>
+                    <a href="{% url 'job_detail' job.id %}" class="jp-btn jp-btn-outline jp-btn-sm">View Details</a>
                 {% endif %}
             </div>
-        </a>
+        </div>
         {% endfor %}
     </div>
 

@@ -26,6 +26,7 @@
                     <th>Date Applied</th>
                     <th>Resume</th>
                     <th>Status</th>
+                    <th>Action</th>
                 </tr>
             </thead>
             <tbody>
@@ -77,10 +78,20 @@
                             {% endif %}
                         </div>
                     </td>
+                    {# FEATURE 1 — Message Applicant button #}
+                    <td>
+                        {% if user.is_staff %}
+                            <a href="{% url 'compose_message' app.applicant.id %}?job_id={{ app.job.id }}"
+                               class="jp-btn jp-btn-outline jp-btn-sm"
+                               title="Send a message to this applicant">
+                                ✉️ Message
+                            </a>
+                        {% endif %}
+                    </td>
                 </tr>
                 {% empty %}
                 <tr class="empty-row">
-                    <td colspan="6">
+                    <td colspan="7">
                         <div class="jp-empty-state">
                             No applications have been submitted yet.
                         </div>

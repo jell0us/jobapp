@@ -1,0 +1,144 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Edit Profile{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+
+    <a href="{% url 'dashboard' %}" class="jp-link d-inline-flex align-items-center gap-1 mb-3" style="font-size:.875rem;">
+        ← Back to Dashboard
+    </a>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-7 col-md-9">
+            <div class="jp-card">
+                <div class="card-body">
+
+                    <div class="text-center mb-4">
+                        <div style="font-size:2.5rem;margin-bottom:.5rem;">✏️</div>
+                        <h2 style="font-weight:700;color:var(--jp-navy);letter-spacing:-.03em;font-size:1.4rem;margin-bottom:.25rem;">
+                            Edit Profile
+                        </h2>
+                        <p style="color:var(--jp-text-muted);font-size:.875rem;margin:0;">
+                            Update your personal information below.
+                        </p>
+                    </div>
+
+                    <hr class="jp-divider">
+
+                    <form method="POST" novalidate>
+                        {% csrf_token %}
+
+                        <p class="jp-label mb-2" style="color:var(--jp-navy);font-size:.8rem;font-weight:600;">Account Credentials</p>
+
+                        <div class="jp-form-group">
+                            <label class="jp-label" for="{{ form.username.id_for_label }}">Username</label>
+                            {{ form.username }}
+                            {% if form.username.errors %}
+                                {% for error in form.username.errors %}
+                                    <div class="jp-field-error text-danger" style="font-size:.8rem;">{{ error }}</div>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+
+                        <div class="jp-form-group">
+                            <label class="jp-label" for="{{ form.email.id_for_label }}">Email Address</label>
+                            {{ form.email }}
+                            {% if form.email.errors %}
+                                {% for error in form.email.errors %}
+                                    <div class="jp-field-error text-danger" style="font-size:.8rem;">{{ error }}</div>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+
+                        <hr class="jp-divider">
+
+                        <p class="jp-label mb-2" style="color:var(--jp-navy);font-size:.8rem;font-weight:600;">Personal Information</p>
+
+                        <div class="row g-2">
+                            <div class="col-sm-6">
+                                <div class="jp-form-group">
+                                    <label class="jp-label" for="{{ form.first_name.id_for_label }}">First Name</label>
+                                    {{ form.first_name }}
+                                    {% if form.first_name.errors %}
+                                        {% for error in form.first_name.errors %}
+                                            <div class="jp-field-error text-danger" style="font-size:.8rem;">{{ error }}</div>
+                                        {% endfor %}
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="jp-form-group">
+                                    <label class="jp-label" for="{{ form.last_name.id_for_label }}">Last Name</label>
+                                    {{ form.last_name }}
+                                    {% if form.last_name.errors %}
+                                        {% for error in form.last_name.errors %}
+                                            <div class="jp-field-error text-danger" style="font-size:.8rem;">{{ error }}</div>
+                                        {% endfor %}
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row g-2">
+                            <div class="col-sm-6">
+                                <div class="jp-form-group">
+                                    <label class="jp-label" for="{{ form.birthdate.id_for_label }}">Birthday</label>
+                                    {{ form.birthdate }}
+                                    {% if form.birthdate.errors %}
+                                        {% for error in form.birthdate.errors %}
+                                            <div class="jp-field-error text-danger" style="font-size:.8rem;">{{ error }}</div>
+                                        {% endfor %}
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="jp-form-group">
+                                    <label class="jp-label" for="{{ form.gender.id_for_label }}">Gender</label>
+                                    {{ form.gender }}
+                                    {% if form.gender.errors %}
+                                        {% for error in form.gender.errors %}
+                                            <div class="jp-field-error text-danger" style="font-size:.8rem;">{{ error }}</div>
+                                        {% endfor %}
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="jp-form-group">
+                            <label class="jp-label" for="{{ form.address.id_for_label }}">Address</label>
+                            {{ form.address }}
+                            {% if form.address.errors %}
+                                {% for error in form.address.errors %}
+                                    <div class="jp-field-error text-danger" style="font-size:.8rem;">{{ error }}</div>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+
+                        <div class="jp-form-group">
+                            <label class="jp-label" for="{{ form.contactno.id_for_label }}">Contact No</label>
+                            {{ form.contactno }}
+                            {% if form.contactno.errors %}
+                                {% for error in form.contactno.errors %}
+                                    <div class="jp-field-error text-danger" style="font-size:.8rem;">{{ error }}</div>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+
+                        <div class="d-flex gap-2 mt-4">
+                            <button type="submit" class="jp-btn jp-btn-accent flex-grow-1 justify-content-center">
+                                Save Changes
+                            </button>
+                            <a href="{% url 'dashboard' %}" class="jp-btn jp-btn-ghost flex-shrink-0">
+                                Cancel
+                            </a>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

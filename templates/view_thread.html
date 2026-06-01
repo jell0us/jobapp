@@ -1,0 +1,121 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Conversation — {{ root_message.subject|default:"Message" }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+
+    <a href="{% url 'inbox' %}" class="jp-link d-inline-flex align-items-center gap-1 mb-3" style="font-size:.875rem;">
+        ← Back to Messages
+    </a>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-md-10">
+
+            {# Thread header card #}
+            <div class="jp-card mb-3">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+                        <div>
+                            <h4 style="font-weight:700;color:var(--jp-navy);margin-bottom:.25rem;">
+                                {{ root_message.subject|default:"(No subject)" }}
+                            </h4>
+                            {% if root_message.related_job %}
+                            <div style="font-size:.85rem;color:var(--jp-text-muted);">
+                                Related job:
+                                <a href="{% url 'job_detail' root_message.related_job.id %}" class="jp-link">
+                                    {{ root_message.related_job.title }}
+                                </a>
+                            </div>
+                            {% endif %}
+                        </div>
+                        <span style="font-size:.8rem;color:var(--jp-text-muted);">
+                            Conversation with
+                            <strong style="color:var(--jp-navy);">
+                                {{ other_party.get_full_name|default:other_party.username }}
+                            </strong>
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            {# Root message bubble #}
+            <div class="jp-card mb-3">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-1">
+                        <div style="font-weight:600;color:var(--jp-navy);">
+                            {{ root_message.sender.get_full_name|default:root_message.sender.username }}
+                            <span style="font-size:.8rem;color:var(--jp-text-muted);font-weight:400;">
+                                (@{{ root_message.sender.username }})
+                            </span>
+                        </div>
+                        <div style="font-size:.8rem;color:var(--jp-text-muted);">
+                            {{ root_message.timestamp|date:"M d, Y H:i" }}
+                        </div>
+                    </div>
+                    <hr class="jp-divider my-2">
+                    <p style="white-space:pre-line;color:var(--jp-slate);line-height:1.7;margin:0;">
+                        {{ root_message.message_body }}
+                    </p>
+                </div>
+            </div>
+
+            {# Replies #}
+            {% for reply in thread_replies %}
+            <div class="jp-card mb-3"
+                 style="{% if reply.sender == user %}border-left: 3px solid var(--jp-accent);{% else %}border-left: 3px solid var(--jp-navy);{% endif %}">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-1">
+                        <div style="font-weight:600;color:var(--jp-navy);">
+                            {{ reply.sender.get_full_name|default:reply.sender.username }}
+                            <span style="font-size:.8rem;color:var(--jp-text-muted);font-weight:400;">
+                                (@{{ reply.sender.username }})
+                            </span>
+                            {% if reply.sender == user %}
+                                <span style="font-size:.75rem;color:var(--jp-accent);margin-left:.3rem;">You</span>
+                            {% endif %}
+                        </div>
+                        <div style="font-size:.8rem;color:var(--jp-text-muted);">
+                            {{ reply.timestamp|date:"M d, Y H:i" }}
+                        </div>
+                    </div>
+                    <hr class="jp-divider my-2">
+                    <p style="white-space:pre-line;color:var(--jp-slate);line-height:1.7;margin:0;">
+                        {{ reply.message_body }}
+                    </p>
+                </div>
+            </div>
+            {% endfor %}
+
+            {# Reply form #}
+            <div class="jp-card">
+                <div class="card-body">
+                    <h6 style="font-weight:600;color:var(--jp-navy);margin-bottom:1rem;">Reply</h6>
+                    <form method="POST" novalidate>
+                        {% csrf_token %}
+
+                        <div class="jp-form-group">
+                            <label class="jp-label" for="{{ form.message_body.id_for_label }}">Your Message</label>
+                            {{ form.message_body }}
+                            {% if form.message_body.errors %}
+                                <div class="text-danger small mt-1">{{ form.message_body.errors|striptags }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="d-flex gap-2 mt-3">
+                            <button type="submit" class="jp-btn jp-btn-accent flex-grow-1 justify-content-center">
+                                Send Reply
+                            </button>
+                            <a href="{% url 'inbox' %}" class="jp-btn jp-btn-ghost flex-shrink-0">
+                                Back to Inbox
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -23,21 +23,28 @@ from job_app.views import LandingPage
 
 
 urlpatterns = [
-   path('admin/', admin.site.urls),
-   path('', LandingPage.as_view(), name='landing_view'),
-   path('login/', views.login_user, name='login_user'),
-   path('logout/', views.logout_user, name='logout_user'),
-   path('register/', views.register_applicant, name='register_applicant'),
-   path('register/employer/', views.register_employer, name='register_employer'),
-   path('dashboard/', views.dashboard, name='dashboard'),
-   path('jobs/', views.job_list, name='job_list'),
-   path('job/<int:job_id>/', views.job_detail, name='job_detail'),
-   path('job/<int:job_id>/apply/', views.apply_job, name='apply_job'),
-   path('job/post/', views.post_job, name='post_job'),
-   path('application/success/', views.application_success, name='application_success'),
-   path('applications/', views.application_list, name='application_list'),
-   path('my_applications/', views.my_applications, name='my_applications'),
-   path('applications/<int:application_id>/status/<str:status>/', views.update_application_status, name='update_status'),
+    path('admin/', admin.site.urls),
+    path('', LandingPage.as_view(), name='landing_view'),
+    path('login/', views.login_user, name='login_user'),
+    path('logout/', views.logout_user, name='logout_user'),
+    path('register/', views.register_applicant, name='register_applicant'),
+    path('register/employer/', views.register_employer, name='register_employer'),
+    path('dashboard/', views.dashboard, name='dashboard'),
+    path('jobs/', views.job_list, name='job_list'),
+    path('job/<int:job_id>/', views.job_detail, name='job_detail'),
+    path('job/<int:job_id>/apply/', views.apply_job, name='apply_job'),
+    path('job/post/', views.post_job, name='post_job'),
+    path('application/success/', views.application_success, name='application_success'),
+    path('applications/', views.application_list, name='application_list'),
+    path('my_applications/', views.my_applications, name='my_applications'),
+    path('applications/<int:application_id>/status/<str:status>/', views.update_application_status, name='update_status'),
+    path('profile/edit/', views.edit_profile, name='edit_profile'),
+    path('job/<int:job_id>/edit/', views.edit_job, name='edit_job'),
+    path('job/<int:job_id>/delete/', views.delete_job, name='delete_job'),
+    path('inbox/', views.inbox, name='inbox'),
+    path('inbox/thread/<int:message_id>/', views.view_thread, name='view_thread'),
+    path('inbox/compose/<int:applicant_id>/', views.compose_message, name='compose_message'),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+

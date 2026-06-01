@@ -12,10 +12,9 @@
 
 <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm" style="border-bottom: 1px solid #e2e8f0; padding: 0.5rem 0;">
     <div class="container-fluid px-4">
-        
+
         <a class="navbar-brand d-inline-flex align-items-center w-auto p-0 m-0" href="{% url 'landing_view' %}" style="text-decoration: none !important;">
             <img src="{% static 'django_job/logo.png' %}" alt="JobPortal Logo" style="max-height: 36px; width: auto; margin: 0; padding: 0; display: block;">
-            
             <span class="ms-2" style="font-size: 1.25rem; font-weight: 700; color: #0f172a !important; letter-spacing: -0.02em; display: inline-block; line-height: 1;">
                 JobPortal
             </span>
@@ -29,16 +28,28 @@
             <ul class="navbar-nav ms-auto align-items-lg-center gap-2">
 
                 {% if user.is_authenticated %}
-                    
+
                     {% if user.is_staff %}
                         <li class="nav-item"><a class="nav-link text-dark fw-bold" href="{% url 'dashboard' %}">Dashboard</a></li>
                         <li class="nav-item"><a class="nav-link text-dark fw-bold" href="{% url 'post_job' %}">Post Job</a></li>
                         <li class="nav-item"><a class="nav-link text-dark fw-bold" href="{% url 'job_list' %}">Manage Jobs</a></li>
                         <li class="nav-item"><a class="nav-link text-dark fw-bold" href="{% url 'application_list' %}">Applicants</a></li>
+                        <!-- FEATURE 1 — Messages nav link for employer -->
+                        <li class="nav-item">
+                            <a class="nav-link text-dark fw-bold position-relative" href="{% url 'inbox' %}">
+                                ✉️ Messages
+                            </a>
+                        </li>
                     {% else %}
                         <li class="nav-item"><a class="nav-link text-dark fw-bold" href="{% url 'dashboard' %}">Dashboard</a></li>
                         <li class="nav-item"><a class="nav-link text-dark fw-bold" href="{% url 'job_list' %}">Browse Jobs</a></li>
                         <li class="nav-item"><a class="nav-link text-dark fw-bold" href="{% url 'my_applications' %}">My Applications</a></li>
+                        <!-- FEATURE 1 — Messages replaces old notification bell for applicant -->
+                        <li class="nav-item">
+                            <a class="nav-link text-dark fw-bold" href="{% url 'inbox' %}">
+                                ✉️ Messages
+                            </a>
+                        </li>
                     {% endif %}
 
                     <li class="nav-item dropdown ms-lg-2">
@@ -57,6 +68,13 @@
                                     {% if user.is_staff %}Employer{% else %}Applicant{% endif %}
                                 </span>
                             </li>
+                            {% if not user.is_staff %}
+                            <li><hr class="dropdown-divider my-1"></li>
+                            <li>
+                                <!-- FEATURE 3 — Edit Profile link in dropdown (unchanged) -->
+                                <a class="dropdown-item" href="{% url 'edit_profile' %}">✏️ Edit Profile</a>
+                            </li>
+                            {% endif %}
                             <li><hr class="dropdown-divider my-1"></li>
                             <li>
                                 <form method="POST" action="{% url 'logout_user' %}">
@@ -80,6 +98,7 @@
         </div>
     </div>
 </nav>
+
 {% if messages %}
 <div class="jp-messages-wrapper mt-3">
     <div class="container-fluid px-4">

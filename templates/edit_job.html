@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Edit Job — {{ job.title }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+
+    <a href="{% url 'job_list' %}" class="jp-link d-inline-flex align-items-center gap-1 mb-3" style="font-size:.875rem;">
+        ← Back to Jobs
+    </a>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-7 col-md-9">
+            <div class="jp-card">
+                <div class="card-body">
+
+                    <div class="text-center mb-4">
+                        <div style="font-size:2.5rem;margin-bottom:.5rem;">✏️</div>
+                        <h2 style="font-weight:700;color:var(--jp-navy);letter-spacing:-.03em;font-size:1.4rem;margin-bottom:.25rem;">
+                            Edit Job Listing
+                        </h2>
+                        <p style="color:var(--jp-text-muted);font-size:.875rem;margin:0;">
+                            Update the details for <strong>{{ job.title }}</strong>
+                        </p>
+                    </div>
+
+                    <hr class="jp-divider">
+
+                    <form method="POST" novalidate>
+                        {% csrf_token %}
+
+                        <div class="jp-form-group">
+                            <label class="jp-label" for="{{ form.title.id_for_label }}">
+                                Job Title <span class="text-danger">*</span>
+                            </label>
+                            {{ form.title }}
+                            {% if form.title.errors %}
+                                <div class="text-danger small mt-1">{{ form.title.errors|striptags }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="jp-form-group">
+                            <label class="jp-label" for="{{ form.description.id_for_label }}">
+                                Job Description <span class="text-danger">*</span>
+                            </label>
+                            {{ form.description }}
+                            {% if form.description.errors %}
+                                <div class="text-danger small mt-1">{{ form.description.errors|striptags }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="jp-form-group">
+                            <label class="jp-label" for="{{ form.requirements.id_for_label }}">
+                                Requirements <span class="text-danger">*</span>
+                            </label>
+                            {{ form.requirements }}
+                            {% if form.requirements.errors %}
+                                <div class="text-danger small mt-1">{{ form.requirements.errors|striptags }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="d-flex gap-2 mt-4">
+                            <button type="submit" class="jp-btn jp-btn-accent flex-grow-1 justify-content-center">
+                                Save Changes
+                            </button>
+                            <a href="{% url 'job_list' %}" class="jp-btn jp-btn-ghost flex-shrink-0">
+                                Cancel
+                            </a>
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

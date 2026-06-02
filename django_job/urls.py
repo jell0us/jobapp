@@ -42,7 +42,7 @@ urlpatterns = [
     path('job/<int:job_id>/edit/', views.edit_job, name='edit_job'),
     path('job/<int:job_id>/delete/', views.delete_job, name='delete_job'),
     path('inbox/', views.inbox, name='inbox'),
-    path('inbox/thread/<int:message_id>/', views.view_thread, name='view_thread'),
+    path('inbox/thread/<int:partner_id>/', views.view_thread, name='view_thread'),
     path('inbox/compose/<int:applicant_id>/', views.compose_message, name='compose_message'),
 ]
 

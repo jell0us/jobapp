@@ -174,8 +174,14 @@ def register_employer(request):
 
 @login_required(login_url='login_user')
 def job_list(request):
-    jobs = Job.objects.all()
+    # If the user is an employer (staff), only show their own posted jobs
+    if request.user.is_staff:
+        jobs = Job.objects.filter(posted_by=request.user)
+    else:
+        # Otherwise, show all jobs to regular applicants
+        jobs = Job.objects.all()
 
+    # Keep your existing application-checking logic for regular users
     if not request.user.is_staff:
         applied_job_ids = Application.objects.filter(
             applicant=request.user
@@ -343,92 +349,98 @@ def delete_job(request, job_id):
 # ---------------------------------------------------------------------------
 # FEATURE 1 — Internal Messaging System
 # ---------------------------------------------------------------------------
+from django.db.models import Q
 
 @login_required(login_url='login_user')
 def inbox(request):
     """
-    Shows the message inbox for the logged-in user.
-    Groups top-level messages (no parent) so threads are not duplicated.
-    Newest first.
+    Messenger-style unified chat workspace.
+    Groups conversations dynamically by the other participant, showing
+    the absolute latest message regardless of who sent it.
     """
-    # Collect all top-level messages where the user is sender or receiver
     user = request.user
-    received = Message.objects.filter(
-        receiver=user,
-        parent__isnull=True
-    ).select_related('sender', 'related_job').order_by('-timestamp')
+    
+    # 1. Fetch ALL messages involving the current user, newest first
+    # Note: Using your model's field names 'receiver' and 'message_body'
+    all_messages = Message.objects.filter(
+        Q(sender=user) | Q(receiver=user)
+    ).select_related('sender', 'receiver', 'related_job').order_by('-timestamp')
 
-    sent = Message.objects.filter(
-        sender=user,
-        parent__isnull=True
-    ).select_related('receiver', 'related_job').order_by('-timestamp')
+    # 2. Extract unique conversation threads
+    conversations = {}
+    for msg in all_messages:
+        # Identify the conversation partner
+        partner = msg.receiver if msg.sender == user else msg.sender
+        
+        # Since queries are sorted '-timestamp', the first occurrence of a partner
+        # is guaranteed to be the most recent message in that interaction sequence.
+        if partner.id not in conversations:
+            conversations[partner.id] = {
+                'partner': partner,
+                'last_message': msg,
+                # Carry over job context if it exists
+                'related_job': msg.related_job, 
+            }
 
+    # 3. Convert dictionary values back to a chronological list
+    chat_threads = list(conversations.values())
+    
+    # Calculate unread messages safely
     unread_count = Message.objects.filter(receiver=user, is_read=False).count()
 
     context = {
-        'received': received,
-        'sent': sent,
+        'chat_threads': chat_threads,
         'unread_count': unread_count,
     }
     return render(request, 'inbox.html', context)
 
-
 @login_required(login_url='login_user')
-def view_thread(request, message_id):
+def view_thread(request, partner_id):
     """
-    Shows the full conversation thread starting from a top-level message.
-    Marks all messages in the thread as read for the current user.
-    Allows replying.
+    Displays the entire continuous back-and-forth chat history 
+    between the logged-in user and a single conversation partner.
     """
     user = request.user
-    # Get the root message of the thread
-    root_message = get_object_or_404(Message, id=message_id)
+    # Find who the user is chatting with
+    partner = get_object_or_404(User, id=partner_id)
 
-    # Security: only sender or receiver of the root message can view the thread
-    if root_message.sender != user and root_message.receiver != user:
-        messages.error(request, 'You do not have access to this conversation.')
-        return redirect('inbox')
+    # Pull the total shared transcript from oldest to newest
+    chat_history = Message.objects.filter(
+        (Q(sender=user) & Q(receiver=partner)) |
+        (Q(sender=partner) & Q(receiver=user))
+    ).select_related('sender', 'receiver', 'related_job').order_by('timestamp')
 
-    # Collect all replies for this thread
-    thread_replies = Message.objects.filter(
-        parent=root_message
-    ).select_related('sender', 'receiver').order_by('timestamp')
+    # Automatic read indicator handling
+    chat_history.filter(receiver=user, is_read=False).update(is_read=True)
 
-    # Mark all messages in thread as read if the current user is the receiver
-    if root_message.receiver == user and not root_message.is_read:
-        root_message.is_read = True
-        root_message.save()
-
-    thread_replies.filter(receiver=user, is_read=False).update(is_read=True)
-
-    # Determine the "other party" for the reply form
-    if root_message.sender == user:
-        other_party = root_message.receiver
-    else:
-        other_party = root_message.sender
+    # Extract job reference safely if any message in the string contains it
+    latest_msg_with_job = chat_history.exclude(related_job__isnull=True).last()
+    related_job = latest_msg_with_job.related_job if latest_msg_with_job else None
 
     if request.method == 'POST':
         form = ReplyMessageForm(request.POST)
         if form.is_valid():
+            # Create the message directly within the continuous dialogue tree
             Message.objects.create(
                 sender=user,
-                receiver=other_party,
-                related_job=root_message.related_job,
-                subject=root_message.subject,
+                receiver=partner,
+                related_job=related_job,
+                # Mirroring your original pattern for subject preservation
+                subject=latest_msg_with_job.subject if latest_msg_with_job else "Job Portal Chat",
                 message_body=form.cleaned_data['message_body'],
-                parent=root_message,
                 is_read=False,
             )
             messages.success(request, 'Reply sent.')
-            return redirect('view_thread', message_id=root_message.id)
+            return redirect('view_thread', partner_id=partner.id)
     else:
         form = ReplyMessageForm()
 
     context = {
-        'root_message': root_message,
-        'thread_replies': thread_replies,
+        'partner': partner,
+        'other party': partner,
+        'chat_history': chat_history,
         'form': form,
-        'other_party': other_party,
+        'related_job': related_job,
     }
     return render(request, 'view_thread.html', context)
 
@@ -441,7 +453,7 @@ def compose_message(request, applicant_id):
     """
     if not request.user.is_staff:
         messages.error(request, 'Only employers can send messages.')
-        return redirect('dashboard')
+        return redirect('view_thread', partner_id=applicant.id)
 
     applicant = get_object_or_404(User, id=applicant_id, is_staff=False)
 
@@ -475,9 +487,6 @@ def compose_message(request, applicant_id):
     return render(request, 'compose_message.html', context)
 
 
-# ---------------------------------------------------------------------------
-# FEATURE 3 — Applicant Profile Editing (unchanged, kept as-is)
-# ---------------------------------------------------------------------------
 
 @login_required(login_url='login_user')
 def edit_profile(request):

@@ -1,14 +1,14 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Messages — Inbox{% endblock %}
+{% block title %}Messages — Chats{% endblock %}
 
 {% block content %}
 <div class="container-fluid">
 
     <div class="jp-page-header d-flex justify-content-between align-items-start flex-wrap gap-2">
         <div>
-            <h2>✉️ Messages</h2>
+            <h2> Messages</h2>
             <p class="subtitle">Your conversations with {% if user.is_staff %}applicants{% else %}employers{% endif %}</p>
         </div>
         {% if unread_count %}
@@ -18,58 +18,62 @@
         {% endif %}
     </div>
 
-    {# ---- Received / Inbox ---- #}
+    {# ---- Unified Messenger-Style Chats Window ---- #}
     <div class="jp-card mb-4">
         <div class="card-body">
             <div class="jp-section-header mb-3">
-                <h5>Inbox</h5>
+                <h5>Recent Chats</h5>
             </div>
             <div class="jp-table-wrap">
                 <table class="table jp-table mb-0">
                     <thead>
                         <tr>
-                            <th>From</th>
-                            <th>Subject</th>
-                            <th>Job</th>
+                            <th>Chat Partner</th>
+                            <th>Latest Message</th>
+                            <th>Job Context</th>
                             <th>Date</th>
                             <th></th>
                         </tr>
                     </thead>
                     <tbody>
-                        {% for msg in received %}
-                        <tr {% if not msg.is_read %}style="font-weight:700;background:#f0f4ff;"{% endif %}>
+                        {% for thread in chat_threads %}
+                        {# Kon wala pa nimo mabasahi ang last message ug ikaw ang receiver, i-bold ang text #}
+                        <tr {% if not thread.last_message.is_read and thread.last_message.receiver == request.user %}style="font-weight:700;background:#f0f4ff;"{% endif %}>
                             <td>
                                 <div style="font-weight:600;color:var(--jp-navy);">
-                                    {{ msg.sender.get_full_name|default:msg.sender.username }}
+                                    {{ thread.partner.get_full_name|default:thread.partner.username }}
                                 </div>
-                                <div style="font-size:.78rem;color:var(--jp-text-muted);">@{{ msg.sender.username }}</div>
+                                <div style="font-size:.78rem;color:var(--jp-text-muted);">@{{ thread.partner.username }}</div>
                             </td>
                             <td>
-                                {% if msg.subject %}
-                                    {{ msg.subject }}
-                                {% else %}
-                                    <span style="color:var(--jp-text-muted);font-style:italic;">No subject</span>
-                                {% endif %}
-                                {% if not msg.is_read %}
+                                <span style="font-size: .9rem;">
+                                    {# Messenger indicator: kung ikaw ang last nag-text, butangan og "You:" #}
+                                    {% if thread.last_message.sender == request.user %}
+                                        <span style="color: var(--jp-text-muted); font-weight: normal;">You:</span>
+                                    {% endif %}
+                                    {{ thread.last_message.message_body|truncatechars:50 }}
+                                </span>
+                                {% if not thread.last_message.is_read and thread.last_message.receiver == request.user %}
                                     <span class="jp-badge jp-badge-pending ms-1" style="font-size:.7rem;padding:.1rem .4rem;">New</span>
                                 {% endif %}
                             </td>
                             <td>
-                                {% if msg.related_job %}
-                                    <a href="{% url 'job_detail' msg.related_job.id %}" class="jp-link" style="font-size:.85rem;">
-                                        {{ msg.related_job.title }}
+                                {% if thread.related_job %}
+                                    <a href="{% url 'job_detail' thread.related_job.id %}" class="jp-link" style="font-size:.85rem;">
+                                        {{ thread.related_job.title }}
                                     </a>
                                 {% else %}
                                     <span style="color:var(--jp-text-muted);font-size:.82rem;">—</span>
                                 {% endif %}
                             </td>
                             <td style="color:var(--jp-text-muted);font-size:.85rem;white-space:nowrap;">
-                                {{ msg.timestamp|date:"M d, Y" }}<br>
-                                <span style="font-size:.78rem;font-family:var(--jp-mono);">{{ msg.timestamp|date:"H:i" }}</span>
+                                {{ thread.last_message.timestamp|date:"M d, Y" }}<br>
+                                <span style="font-size:.78rem;font-family:var(--jp-mono);">{{ thread.last_message.timestamp|date:"H:i" }}</span>
                             </td>
                             <td>
-                                <a href="{% url 'view_thread' msg.id %}" class="jp-btn jp-btn-outline jp-btn-sm">
-                                    Open
+                                {# Gi-ilisdan og thread.partner.id aron mo-connect sa bag-ong partner route #}
+                                <a href="{% url 'view_thread' thread.partner.id %}" class="jp-btn jp-btn-outline jp-btn-sm">
+                                    Open Chat
                                 </a>
                             </td>
                         </tr>
@@ -77,8 +81,8 @@
                         <tr class="empty-row">
                             <td colspan="5">
                                 <div class="jp-empty-state">
-                                    <span class="empty-icon">✉️</span>
-                                    No messages received yet.
+                                    <span class="empty-icon">💬</span>
+                                    No conversations started yet.
                                 </div>
                             </td>
                         </tr>
@@ -88,73 +92,5 @@
             </div>
         </div>
     </div>
-
-    {# ---- Sent Messages ---- #}
-    <div class="jp-card">
-        <div class="card-body">
-            <div class="jp-section-header mb-3">
-                <h5>Sent</h5>
-            </div>
-            <div class="jp-table-wrap">
-                <table class="table jp-table mb-0">
-                    <thead>
-                        <tr>
-                            <th>To</th>
-                            <th>Subject</th>
-                            <th>Job</th>
-                            <th>Date</th>
-                            <th></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for msg in sent %}
-                        <tr>
-                            <td>
-                                <div style="font-weight:600;color:var(--jp-navy);">
-                                    {{ msg.receiver.get_full_name|default:msg.receiver.username }}
-                                </div>
-                                <div style="font-size:.78rem;color:var(--jp-text-muted);">@{{ msg.receiver.username }}</div>
-                            </td>
-                            <td>
-                                {% if msg.subject %}
-                                    {{ msg.subject }}
-                                {% else %}
-                                    <span style="color:var(--jp-text-muted);font-style:italic;">No subject</span>
-                                {% endif %}
-                            </td>
-                            <td>
-                                {% if msg.related_job %}
-                                    <a href="{% url 'job_detail' msg.related_job.id %}" class="jp-link" style="font-size:.85rem;">
-                                        {{ msg.related_job.title }}
-                                    </a>
-                                {% else %}
-                                    <span style="color:var(--jp-text-muted);font-size:.82rem;">—</span>
-                                {% endif %}
-                            </td>
-                            <td style="color:var(--jp-text-muted);font-size:.85rem;white-space:nowrap;">
-                                {{ msg.timestamp|date:"M d, Y" }}<br>
-                                <span style="font-size:.78rem;font-family:var(--jp-mono);">{{ msg.timestamp|date:"H:i" }}</span>
-                            </td>
-                            <td>
-                                <a href="{% url 'view_thread' msg.id %}" class="jp-btn jp-btn-outline jp-btn-sm">
-                                    View
-                                </a>
-                            </td>
-                        </tr>
-                        {% empty %}
-                        <tr class="empty-row">
-                            <td colspan="5">
-                                <div class="jp-empty-state">
-                                    No sent messages yet.
-                                </div>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-
 </div>
 {% endblock %}
